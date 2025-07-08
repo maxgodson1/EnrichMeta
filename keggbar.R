@@ -6,7 +6,7 @@
 #' @param results A data.frame returned from kegg_metabolite_enrichment().
 #' @return A ggplot2 object.
 #' @export
-keggbar <- function(results, top = 25) {
+enrichbar <- function(results, top = 25) {
   # 确保必要的包已加载
   library(ggplot2)
   
