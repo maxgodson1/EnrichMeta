@@ -1,19 +1,12 @@
-Package: KeggMetaboliteEnrichment
+Package: AnalysisMeta
 Type: Package
-Title: KEGG Metabolite Enrichment Analysis and Visualization
+Title: Metabolomics analysis and visualization
 Version: 0.1.0
-Authors@R: 
-    person(given = "Zhuang", 
-           family = "Shao", 
-           email = "shaozhuang21@mails.ucas.ac.cn", 
-           role = c("aut", "cre"))
-Description: Perform KEGG metabolite enrichment analysis and visualize the results.
+Description: Perform  metabolite enrichment analysis , Path analysis and network analysis
 Depends: R (>= 3.5.0)
 Imports: 
     KEGGREST,
     ggplot2,
-    stats
 License: NA
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.3.1
