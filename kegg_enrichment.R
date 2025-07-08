@@ -6,7 +6,7 @@
 #'
 #' @return A data.frame with enrichment results
 #' @export
-kegg_metabolite_enrichment <- function(KEGGid, species, p.adjust.method = "BH") {
+kegg_enrichment <- function(KEGGid, species, p.adjust.method = "BH") {
   pathways <- KEGGREST::keggList("pathway", species)
   path_ids <- sub("path:", "", names(pathways))
 
@@ -42,13 +42,13 @@ kegg_metabolite_enrichment <- function(KEGGid, species, p.adjust.method = "BH") 
       enrich_ratio <- (k * M) / (n * N)
       matched <- paste(overlap, collapse = "; ")
       results <- rbind(results, data.frame(
-        ID = pid,
+        pathwayID = pid,
         Description = pathways[pid],
-        GeneRatio = paste0(k, "/", N),
+        MetaRatio = paste0(k, "/", N),
         BgRatio = paste0(n, "/", M),
         pvalue = p,
         EnrichmentRatio = enrich_ratio,
-        geneID = matched,
+        keggID = matched,
         Count = k
       ))
     }
