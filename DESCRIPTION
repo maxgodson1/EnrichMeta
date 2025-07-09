@@ -1,4 +1,4 @@
-Package: EnrichMeta
+Package: enrichmeta
 Title: KEGG Enrichment Analysis Tools
 Version: 0.1.0
 Authors@R: 
