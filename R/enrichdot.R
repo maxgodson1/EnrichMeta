@@ -1,9 +1,9 @@
 #' Title: Draw KEGG dotplot
 #'
 #' @description
-#' Draw a dotplot of KEGG enrichment results returned by `KeggEnrich()`.
+#' Draw a dotplot of KEGG enrichment results returned by `keggenrich()`.
 #'
-#' @param results A data.frame returned from KeggEnrich().
+#' @param results A data.frame returned from keggenrich().
 #' @param top Number of top pathways to display (default=25)
 #' @param title Plot title (default="Enriched Metabolic Pathways")
 #' @param low_color Color for significant p-values (default="#FF0000")
@@ -19,7 +19,7 @@
 #' @param padding_right Additional right padding for points (default=0.3)
 #' @return A ggplot2 object.
 #' @export
-EnrichDot <- function(results, 
+enrichdot <- function(results, 
                       top = 25,
                       title = "Enriched Metabolic Pathways",
                       low_color = "#FF0000",
