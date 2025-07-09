@@ -1,12 +1,12 @@
 #' Title: Draw KEGG dotplot
 #'
 #' @description
-#' Draw a barplot of KEGG enrichment results returned by `kegg_metabolite_enrichment()`.
+#' Draw a barplot of KEGG enrichment results returned by `KeggEnrich()`.
 #'
-#' @param results A data.frame returned from kegg_metabolite_enrichment().
+#' @param results A data.frame returned from KeggEnrich().
 #' @return A ggplot2 object.
 #' @export
-enrichbar <- function(results, top = 25) {
+EnrichBar <- function(results, top = 25) {
   # 确保必要的包已加载
   library(ggplot2)
   library(stringr)  # 用于换行长标签
