@@ -1,12 +1,12 @@
 #' Title: Draw KEGG dotplot
 #'
 #' @description
-#' Draw a dotplot of KEGG enrichment results returned by `KeggEnrich()`.
+#' Draw a dotplot of KEGG enrichment results returned by `keggenrich()`.
 #'
-#' @param results A data.frame returned from KeggEnrich().
+#' @param results A data.frame returned from keggenrich().
 #' @return A ggplot2 object.
 #' @export
-EnrichDot <- function(results, top = 25) {
+enrichdot <- function(results, top = 25) {
   # 确保所需包已加载
   if (!requireNamespace("ggplot2", quietly = TRUE)) {
     stop("请先安装ggplot2包：install.packages('ggplot2')")
