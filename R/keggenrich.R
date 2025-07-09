@@ -1,59 +1,20 @@
-#' Perform KEGG metabolite enrichment with caching and progress tracking
+#' 执行KEGG代谢物富集分析
 #'
-#' @param KEGGid A character vector of KEGG compound IDs (e.g., "C00160")
-#' @param species A character string, KEGG species code (e.g., "hsa", "eco")
-#' @param p.adjust.method Adjustment method for multiple testing, default is "BH"
-#' @param use_cache Logical, whether to use cached pathway data, default TRUE
-#' @param cache_dir Directory to store cache files, default is tempdir()
+#' 使用超几何检验进行KEGG代谢物富集分析
 #'
-#' @return A data.frame with enrichment results
+#' @param KEGGid 代谢物KEGG ID向量 (e.g., "C00160")
+#' @param species KEGG物种代码 (e.g., "hsa")
+#' @param pathway_data 获取的通路数据
+#' @param p.adjust.method p值校正方法，默认"BH"
+#'
+#' @return 富集结果数据框
 #' @export
-keggenrich <- function(KEGGid, species, p.adjust.method = "BH", 
-                            use_cache = TRUE, cache_dir = tempdir()) {
+
+keggenrich <- function(KEGGid, species, pathway_data, p.adjust.method = "BH") {
   
-  # 创建缓存文件名
-  cache_file <- file.path(cache_dir, paste0("kegg_pathways_", species, ".rds"))
-  
-  # 尝试从缓存加载通路数据
-  if (use_cache && file.exists(cache_file)) {
-    message("Loading cached pathway data...")
-    pathway_data <- readRDS(cache_file)
-    pathways <- pathway_data$pathways
-    pathway2compound <- pathway_data$pathway2compound
-    message(sprintf("Loaded %d pathways from cache", length(pathway2compound)))
-  } else {
-    # 没有缓存则从KEGG获取
-    message("Fetching pathway data from KEGG...")
-    pathways <- KEGGREST::keggList("pathway", species)
-    
-    # 提取通路ID
-    path_ids <- sub("path:", "", names(pathways))
-    
-    # 进度条：获取通路中的化合物
-    pb <- utils::txtProgressBar(min = 0, max = length(path_ids), style = 3)
-    pathway2compound <- list()
-    
-    for (i in seq_along(path_ids)) {
-      pid <- path_ids[i]
-      entry <- tryCatch(KEGGREST::keggGet(pid)[[1]], error = function(e) NULL)
-      
-      if (!is.null(entry) && !is.null(entry$COMPOUND)) {
-        pathway2compound[[pid]] <- names(entry$COMPOUND)
-      }
-      utils::setTxtProgressBar(pb, i)
-    }
-    close(pb)
-    
-    # 保存到缓存
-    if (use_cache) {
-      pathway_data <- list(
-        pathways = pathways,
-        pathway2compound = pathway2compound
-      )
-      saveRDS(pathway_data, cache_file)
-      message(sprintf("Cached %d pathways to %s", length(pathway2compound), cache_file))
-    }
-  }
+  # 获取通路数据
+  pathways <- pathway_data$pathways
+  pathway2compound <- pathway_data$pathway2compound
   
   # 准备富集分析
   all_cmpds <- unique(unlist(pathway2compound))
