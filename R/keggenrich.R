@@ -8,7 +8,7 @@
 #'
 #' @return A data.frame with enrichment results
 #' @export
-KeggEnrich <- function(KEGGid, species, p.adjust.method = "BH", 
+keggenrich <- function(KEGGid, species, p.adjust.method = "BH", 
                             use_cache = TRUE, cache_dir = tempdir()) {
   
   # 创建缓存文件名
