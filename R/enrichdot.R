@@ -75,7 +75,9 @@ enrichdot <- function(results,
        ggplot2::scale_color_gradient(
          low = low_color, 
          high = high_color,
-         limits = color_limits,
+         limits = c(0, 0.2),  # 固定颜色范围为0-0.2
+         breaks = seq(0, 0.2, by = 0.05),  # 设置固定刻度
+         labels = function(x) sprintf("%.2f", x),  # 格式化标签显示两位小数
          name = "P-value"
        ) +
        ggplot2::scale_size_continuous(
