@@ -6,7 +6,7 @@
 #'
 #' @return A data.frame with enrichment results
 #' @export
-kegg_enrichment <- function(KEGGid, species, p.adjust.method = "BH") {
+KeggEnrich <- function(KEGGid, species, p.adjust.method = "BH") {
   pathways <- KEGGREST::keggList("pathway", species)
   path_ids <- sub("path:", "", names(pathways))
 
