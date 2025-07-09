@@ -1,6 +1,7 @@
 export(enrichbar)
 export(enrichdot)
 export(keggenrich)
+export(getkd)
 import(ggplot2)
 import(stringr)
 import(KEGGREST)
