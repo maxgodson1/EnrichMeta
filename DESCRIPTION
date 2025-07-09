@@ -3,10 +3,12 @@ Title: KEGG Enrichment Analysis Tools
 Version: 0.1.0
 Authors@R: 
     person("botao", "zhang", email = "3048986896@qq.com", role = c("aut", "cre"))
-Description: Tools for KEGG enrichment analysis and visualization.
+Description: Tools for KEGG enrichment analysis and visualization. Includes functions for enrichment analysis (keggenrich) and visualization (enrichbar and enrichdot).
 License: MIT
 Depends: R (>= 4.0.0)
 Imports: 
     ggplot2,
     stringr,
     KEGGREST
+Encoding: UTF-8
+RoxygenNote: 7.2.3
