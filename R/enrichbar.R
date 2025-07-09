@@ -1,9 +1,9 @@
 #' Title: Draw KEGG dotplot
 #'
 #' @description
-#' Draw a barplot of KEGG enrichment results returned by `KeggEnrich()`.
+#' Draw a barplot of KEGG enrichment results returned by `keggenrich()`.
 #'
-#' @param results A data.frame returned from KeggEnrich().
+#' @param results A data.frame returned from keggenrich().
 #' @param top Number of top pathways to display (default=25)
 #' @param title Plot title (default="Overview of Enriched Metabolite Sets")
 #' @param low_color Color for significant p-values (default="#FF0000")
@@ -16,7 +16,7 @@
 #' @param legend_position Legend position (default="right")
 #' @return A ggplot2 object.
 #' @export
-EnrichBar <- function(results, 
+enrichbar <- function(results, 
                       top = 25,
                       title = "Overview of Enriched Metabolite Sets",
                       low_color = "#FF0000",
