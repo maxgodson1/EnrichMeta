@@ -6,7 +6,7 @@
 #' @param results A data.frame returned from kegg_metabolite_enrichment().
 #' @return A ggplot2 object.
 #' @export
-enrichdot <- function(results, top = 25) {
+EnrichDot <- function(results, top = 25) {
   # 确保所需包已加载
   if (!requireNamespace("ggplot2", quietly = TRUE)) {
     stop("请先安装ggplot2包：install.packages('ggplot2')")
