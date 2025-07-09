@@ -28,32 +28,29 @@ enrichbar <- function(results,
                       color_limits = c(0, 0.2),
                       legend_position = "right") {
   
-  library(ggplot2)
-  library(stringr)
-  
   # 筛选并排序数据
   top_results <- head(results[order(results$p.adjust), ], top)
   top_results <- top_results[order(top_results$p.adjust, decreasing = FALSE), ]
   
   # 处理长标签
-  top_results$Description <- str_wrap(top_results$Description, width = wrap_width)
+  top_results$Description <- stringr::str_wrap(top_results$Description, width = wrap_width)
   top_results$Description <- factor(top_results$Description, 
                                     levels = rev(top_results$Description))
   
   # 创建基础绘图
-  p <- ggplot(top_results, aes(
+  p <- ggplot2::ggplot(top_results, ggplot2::aes(
     x = EnrichmentRatio,
     y = Description,
     fill = pvalue
   )) +
-    geom_bar(stat = "identity", width = bar_width) +
-    labs(
+    ggplot2::geom_bar(stat = "identity", width = bar_width) +
+    ggplot2::labs(
       x = "Enrichment Ratio", 
       y = NULL,
       title = title
     ) +
-    theme_minimal(base_size = base_size) +
-    scale_fill_gradient(
+    ggplot2::theme_minimal(base_size = base_size) +
+    ggplot2::scale_fill_gradient(
       name = "P-value",
       low = low_color,
       high = high_color,
@@ -61,44 +58,44 @@ enrichbar <- function(results,
       breaks = seq(min(color_limits), max(color_limits), length.out = 5),
       labels = function(x) sprintf("%.2f", x)
     ) +
-    theme(
-      axis.text.y = element_text(
+    ggplot2::theme(
+      axis.text.y = ggplot2::element_text(
         size = base_size - 2, 
         color = "black", 
         face = "bold",
-        margin = margin(r = 10)
+        margin = ggplot2::margin(r = 10)
       ),
-      axis.text.x = element_text(size = base_size - 2, color = "black"),
-      axis.title.x = element_text(
+      axis.text.x = ggplot2::element_text(size = base_size - 2, color = "black"),
+      axis.title.x = ggplot2::element_text(
         size = base_size, 
         face = "bold", 
-        margin = margin(t = 10)
+        margin = ggplot2::margin(t = 10)
       ),
-      plot.title = element_text(
+      plot.title = ggplot2::element_text(
         size = base_size + 4, 
         face = "bold", 
         hjust = 0.5, 
-        margin = margin(b = 15)
+        margin = ggplot2::margin(b = 15)
       ),
       legend.position = legend_position,
-      legend.title = element_text(size = base_size - 2, face = "bold"),
-      legend.text = element_text(size = base_size - 3),
-      panel.grid.major.y = element_blank(),
-      panel.grid.minor = element_blank(),
-      plot.margin = margin(1, 2.5, 1, 1, "cm"),
-      plot.background = element_rect(fill = "white", color = NA),
-      panel.background = element_rect(fill = "white", color = NA)
+      legend.title = ggplot2::element_text(size = base_size - 2, face = "bold"),
+      legend.text = ggplot2::element_text(size = base_size - 3),
+      panel.grid.major.y = ggplot2::element_blank(),
+      panel.grid.minor = ggplot2::element_blank(),
+      plot.margin = ggplot2::margin(1, 2.5, 1, 1, "cm"),
+      plot.background = ggplot2::element_rect(fill = "white", color = NA),
+      panel.background = ggplot2::element_rect(fill = "white", color = NA)
     ) +
-    scale_x_continuous(
-      expand = expansion(mult = c(0, 0.3)),
+    ggplot2::scale_x_continuous(
+      expand = ggplot2::expansion(mult = c(0, 0.3)),
       breaks = scales::pretty_breaks(n = 5)
     ) +
-    coord_cartesian(clip = "off")
+    ggplot2::coord_cartesian(clip = "off")
   
   # 条件添加富集比标签
   if(show_ratio) {
-    p <- p + geom_text(
-      aes(label = sprintf("%.1f", EnrichmentRatio)),
+    p <- p + ggplot2::geom_text(
+      ggplot2::aes(label = sprintf("%.1f", EnrichmentRatio)),
       hjust = -0.2,
       size = base_size - 8.5,
       color = "black",
