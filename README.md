@@ -1,21 +1,21 @@
-# KEGGEnrichment
+# enrichmeta
 KEGG enrichment analysis and visualization tools
 
 ## 安装
 ```r
-devtools::install_github("maxgodson1/EnrichMeta")
+devtools::install_github("maxgodson1/enrichmeta")
 ```
 
 ## 使用示例
 ```r
-library(EnrichMeta)
+library(enrichmeta)
 
 # 富集分析
-results <- KeggEnrich(c("C00031", "C00022"), species = "hsa")
+results <- keggenrich(c("C00031", "C00022"), species = "hsa")
 
 # 绘制条形图
-EnrichBar(results)
+enrichbar(results)
 
 # 绘制点图
-EnrichDot(results)
+enrichdot(results)
 ```
