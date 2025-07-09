@@ -1,21 +1,21 @@
-#' 获取并缓存KEGG通路数据
+#' Get and cache KEGG pathway data
 #'
-#' 这个函数负责从KEGG获取通路数据并缓存，供富集分析使用
+#' This function retrieves pathway data from KEGG and caches it for enrichment analysis.
 #'
-#' @param species KEGG物种代码 (e.g., "hsa")
-#' @param cache_dir 缓存目录
+#' @param species KEGG species code (e.g., "hsa")
+#' @param cache_dir Cache directory
 #'
-#' @return 包含两个元素的列表：
-#'   - pathways: 通路ID到通路名称的映射
-#'   - pathway2compound: 通路ID到化合物ID列表的映射
+#' @return A list containing two elements:
+#'   - pathways: mapping from pathway IDs to pathway names
+#'   - pathway2compound: mapping from pathway IDs to compound ID lists
 #' @export
 
-getkpd <- function(species,cache_dir) {
+getkd <- function(species, cache_dir) {
   
-  # 创建缓存文件名
+  # Create cache filename
   cache_file <- file.path(cache_dir, paste0("kegg_pathways_", species, ".rds"))
   
-  # 尝试从缓存加载通路数据
+  # Try to load pathway data from cache
   if (file.exists(cache_file)) {
     message("Loading cached pathway data...")
     pathway_data <- readRDS(cache_file)
@@ -23,14 +23,14 @@ getkpd <- function(species,cache_dir) {
     pathway2compound <- pathway_data$pathway2compound
     message(sprintf("Loaded %d pathways from cache", length(pathway2compound)))
   } else {
-    # 没有缓存则从KEGG获取
+    # Fetch from KEGG if no cache exists
     message("Fetching pathway data from KEGG...")
     pathways <- KEGGREST::keggList("pathway", species)
     
-    # 提取通路ID
+    # Extract pathway IDs
     path_ids <- sub("path:", "", names(pathways))
     
-    # 进度条：获取通路中的化合物
+    # Progress bar: get compounds in pathways
     pb <- utils::txtProgressBar(min = 0, max = length(path_ids), style = 3)
     pathway2compound <- list()
     
@@ -45,7 +45,7 @@ getkpd <- function(species,cache_dir) {
     }
     close(pb)
     
-    # 保存到缓存
+    # Save to cache
     pathway_data <- list(
       pathways = pathways,
       pathway2compound = pathway2compound
@@ -53,4 +53,9 @@ getkpd <- function(species,cache_dir) {
     saveRDS(pathway_data, cache_file)
     message(sprintf("Cached %d pathways to %s", length(pathway2compound), cache_file))
   }
+  
+  return(list(
+    pathways = pathways,
+    pathway2compound = pathway2compound
+  ))
 }
