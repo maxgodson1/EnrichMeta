@@ -1,3 +1,15 @@
+#' 获取并缓存KEGG通路数据
+#'
+#' 这个函数负责从KEGG获取通路数据并缓存，供富集分析使用
+#'
+#' @param species KEGG物种代码 (e.g., "hsa")
+#' @param cache_dir 缓存目录
+#'
+#' @return 包含两个元素的列表：
+#'   - pathways: 通路ID到通路名称的映射
+#'   - pathway2compound: 通路ID到化合物ID列表的映射
+#' @export
+
 getkpd <- function(species,cache_dir) {
   
   # 创建缓存文件名
