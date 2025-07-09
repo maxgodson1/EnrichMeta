@@ -1,0 +1,6 @@
+export(EnrichBar)
+export(EnrichDot)
+export(KeggEnrichment)
+import(ggplot2)
+import(stringr)
+import(KEGGREST)
