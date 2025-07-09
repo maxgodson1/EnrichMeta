@@ -1,13 +1,13 @@
-#' 执行KEGG代谢物富集分析
+#' Perform KEGG Metabolite Enrichment Analysis
 #'
-#' 使用超几何检验进行KEGG代谢物富集分析
+#' Conducts KEGG metabolite enrichment analysis using hypergeometric test
 #'
-#' @param KEGGid 代谢物KEGG ID向量 (e.g., "C00160")
-#' @param species KEGG物种代码 (e.g., "hsa")
-#' @param pathway_data 获取的通路数据
-#' @param p.adjust.method p值校正方法，默认"BH"
+#' @param KEGGid Vector of metabolite KEGG IDs (e.g., "C00160")
+#' @param species KEGG species code (e.g., "hsa")
+#' @param pathway_data Pathway data obtained from getkpd()
+#' @param p.adjust.method p-value adjustment method (default="BH")
 #'
-#' @return 富集结果数据框
+#' @return Enrichment results data frame
 #' @export
 
 keggenrich <- function(KEGGid, species, pathway_data, p.adjust.method = "BH") {
