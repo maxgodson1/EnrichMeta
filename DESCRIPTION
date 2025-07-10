@@ -1,0 +1,21 @@
+Package: enrichmeta
+Title: Metabolite Enrichment Analysis Using KEGG Pathways
+Version: 0.1.0
+Authors@R: 
+    person("botao", "zhang", email = "3048986896@qq.com", role = c("aut", "cre"))
+Description: Performs KEGG-based metabolite enrichment analysis with pathway visualization.
+License: GPL-3
+Depends:
+    R (>= 4.0.0)
+Imports: 
+    KEGGREST,
+    igraph,
+    ggplot2,
+    stringr,
+    utils
+Suggests: 
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr
+RoxygenNote: 7.3.2
+Encoding: UTF-8
