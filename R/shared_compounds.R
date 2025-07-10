@@ -8,6 +8,7 @@
 #'   - shared_df: data.frame containing detailed shared metabolite information
 #'   - pathway_names: pathway name mapping vector
 #'   - compound_counts: vector of metabolite counts for each pathway
+#' @export
 shared_compounds <- function(pathway_data, min_shared = 1) {
   # 提取数据
   pathways <- pathway_data$pathways
