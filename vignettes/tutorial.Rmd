@@ -1,0 +1,85 @@
+---
+title: "enrichmeta 使用教程"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{使用教程}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup}
+library(enrichmeta)
+1. 获取KEGG通路数据
+首先获取斑马鱼(dre)的KEGG通路数据：
+
+{r
+# 设置缓存目录
+cache_dir <- tempdir()  # 实际使用时可替换为您的目录，例如 "F:/data/Kegg_Path"
+
+# 获取KEGG通路数据
+kegg_data <- getkd("dre", cache_dir)
+2. 进行富集分析
+使用一组代谢物KEGG ID进行富集分析：
+
+{r
+# 代谢物KEGG ID列表
+kegg_id <- c("C00300", "C00245", "C00763", "C16308")
+
+# 进行富集分析
+res <- keggenrich(kegg_id, "dre", kegg_data)
+
+# 查看结果
+head(res)
+3. 可视化富集结果
+使用条形图和点图展示富集结果：
+
+{r
+# 绘制条形图
+enrichbar(res)
+
+# 绘制点图
+enrichdot(res)
+4. 通路网络分析
+对于富集到的通路，分析它们之间的共享代谢物：
+
+{r
+# 提取富集通路的ID
+selected_pathways <- res$pathwayID
+
+# 筛选通路数据
+filtered_data <- list(
+  pathways = kegg_data$pathways[selected_pathways],
+  pathway2compound = kegg_data$pathway2compound[selected_pathways]
+)
+
+# 计算共享代谢物
+shared_result <- shared_compounds(filtered_data)
+
+# 查看共享代谢物数据框
+head(shared_result$shared_df)
+5. 网络可视化（可选）
+您可以使用igraph包来可视化通路网络：
+
+{r
+library(igraph)
+plot(shared_result$graph, 
+     vertex.size = 10, 
+     vertex.label.cex = 0.7,
+     edge.width = E(shared_result$graph)$weight)
+text
+
+3. **安装依赖并构建教程**：
+   ```r
+   # 安装构建工具
+   install.packages(c("knitr", "rmarkdown"))
+   
+   # 构建教程
+   devtools::build_vignettes()
+更新DESCRIPTION文件：
+确保DESCRIPTION文件中包含：
+
+text
+Suggests: 
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr
