@@ -1,0 +1,51 @@
+---
+title: "enrichmeta 使用教程"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{tutorial}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+# enrichmeta 使用教程
+
+## 1. 获取KEGG通路数据
+
+```{r get-data, eval=FALSE}
+library(enrichmeta)
+kegg_data <- getkd("dre", "path/to/cache")
+# 查看前5个通路
+head(names(kegg_data$pathways), 5)
+```
+
+## 2. 执行富集分析
+
+```{r enrichment, eval=FALSE}
+kegg_id <- c("C00300", "C00245", "C00763", "C16308")
+res <- keggenrich(kegg_id, "dre", kegg_data)
+# 查看显著结果
+head(res[res$p.adjust < 0.05, ])
+```
+
+## 3. 可视化结果
+
+```{r visualization, eval=FALSE, fig.width=7, fig.height=5}
+# 条形图
+enrichbar(res)
+
+# 点图
+enrichdot(res)
+```
+
+## 4. 分析共享代谢物
+
+```{r shared-compounds, eval=FALSE}
+selected_pathways <- res$pathwayID[1:10]  # 取前10个通路
+filtered_data <- list(
+  pathways = kegg_data$pathways[selected_pathways],
+  pathway2compound = kegg_data$pathway2compound[selected_pathways]
+)
+shared_result <- shared_compounds(filtered_data)
+# 绘制网络图
+plot(shared_result$graph)
+```
