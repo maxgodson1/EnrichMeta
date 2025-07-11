@@ -17,5 +17,7 @@ Suggests:
     knitr,
     rmarkdown
 VignetteBuilder: knitr
-RoxygenNote: 7.3.2
+
 Encoding: UTF-8
+BuildVignettes: FALSE  # 禁用文档构建
+RoxygenNote: 7.2.3    # 降级兼容版本
