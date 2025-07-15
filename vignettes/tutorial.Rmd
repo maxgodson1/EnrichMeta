@@ -49,3 +49,11 @@ shared_result <- shared_compounds(filtered_data)
 # 绘制网络图
 plot(shared_result$graph)
 ```
+
+## 5. 查看代谢物通路信息
+
+```{r pathway-information, eval=FALSE}
+meta_path_data <- metapathinfor(kegg_id,kegg_data) 
+# 统计每个代谢物的通路数量
+pathway_count <- table(meta_path_data$keggID)
+```
