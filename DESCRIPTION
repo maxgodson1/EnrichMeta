@@ -12,7 +12,8 @@ Imports:
     igraph,
     ggplot2,
     stringr,
-    utils
+    utils,
+    dplyr
 Suggests: 
     knitr,
     rmarkdown
