@@ -39,7 +39,7 @@
 
 getkd <- function(species, cache_dir) {
 
-  # 确保缓存目录存在（新增功能）
+  # 确保缓存目录存在
   if (!dir.exists(cache_dir)) {
     message(sprintf("创建缓存目录: %s", cache_dir))
     dir.create(cache_dir, recursive = TRUE, showWarnings = FALSE)
