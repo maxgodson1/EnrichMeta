@@ -1,11 +1,7 @@
 # enrichmeta: KEGG代谢物富集分析工具包
 
-<p align="center">
-  <img src="https://via.placeholder.com/800x200.png?text=enrichmeta+KEGG+Metabolite+Enrichment" alt="enrichmeta logo">
-</p>
-
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
-[![R-CMD-check](https://github.com/yourusername/enrichmeta/workflows/R-CMD-check/badge.svg)](https://github.com/yourusername/enrichmeta/actions)
+[![R-CMD-check](https://github.com/maxgodson1/enrichmeta/workflows/R-CMD-check/badge.svg)](https://github.com/maxgodson1/enrichmeta/actions)
 
 ## 简介
 
