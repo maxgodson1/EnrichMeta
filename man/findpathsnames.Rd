@@ -4,12 +4,12 @@
 \alias{findpathsnames}
 \title{Map Pathway IDs to Pathway Names}
 \usage{
-findpathsnames(pathwayid, pathways_data)
+findpathsnames(pathwayid, pathway_data)
 }
 \arguments{
 \item{pathwayid}{Character vector of KEGG pathway IDs (e.g., c("hsa00010", "hsa00020"))}
 
-\item{pathways_data}{Pathway data object from `getkeggdata()`}
+\item{pathway_data}{Pathway data object from \code{\link{getkeggdata}}}
 }
 \value{
 A data frame with two columns:
@@ -24,6 +24,6 @@ Retrieves pathway names for given pathway IDs using cached KEGG data.
 \examples{
 \dontrun{
 kegg_data <- getkeggdata("hsa", cache_dir = "./cache")
-findpathsnames(c("hsa00010", "hsa00020"), pathways_data = kegg_data)
+findpathsnames(c("hsa00010", "hsa00020"), pathway_data = kegg_data)
 }
 }

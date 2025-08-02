@@ -3,7 +3,7 @@
 #' Retrieves pathway names for given pathway IDs using cached KEGG data.
 #'
 #' @param pathwayid Character vector of KEGG pathway IDs (e.g., c("hsa00010", "hsa00020"))
-#' @param pathways_data Pathway data object from `getkeggdata()`
+#' @param pathway_data Pathway data object from \code{\link{getkeggdata}}
 #'
 #' @return A data frame with two columns:
 #'   \itemize{
@@ -14,11 +14,11 @@
 #' @examples
 #' \dontrun{
 #' kegg_data <- getkeggdata("hsa", cache_dir = "./cache")
-#' findpathsnames(c("hsa00010", "hsa00020"), pathways_data = kegg_data)
+#' findpathsnames(c("hsa00010", "hsa00020"), pathway_data = kegg_data)
 #' }
 #' @export
 
-findpathsnames <- function(pathwayid, pathways_data) {
+findpathsnames <- function(pathwayid, pathway_data) {
   # 确保输入是字符向量
   if (!is.character(pathwayid)) {
     stop("pathwayid must be a character vector")
@@ -36,9 +36,9 @@ findpathsnames <- function(pathwayid, pathways_data) {
     id <- pathwayid[i]
 
     # 检查ID是否在通路数据中
-    if (id %in% names(pathways_data$pathways)) {
+    if (id %in% names(pathway_data$pathways)) {
       result$pathwayID[i] <- id
-      result$Description[i] <- pathways_data$pathways[[id]]
+      result$Description[i] <- pathway_data$pathways[[id]]
     } else {
       result$pathwayID[i] <- id
       result$Description[i] <- "Not found"

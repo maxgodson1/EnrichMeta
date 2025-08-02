@@ -1,16 +1,17 @@
 Package: enrichmeta
 Title: Metabolite Enrichment Analysis Using KEGG Pathways
-Version: 1.1.0
+Version: 1.1.1
 Authors@R: 
     person("botao", "zhang", email = "3048986896@qq.com", role = c("aut", "cre"))
-Description:     
-    Performs KEGG-based metabolite enrichment analysis with pathway visualization.
-    Includes functions for:
-    - Retrieving and caching KEGG pathway data
-    - Metabolite set enrichment analysis
-    - Pathway-metabolite mapping
-    - Visualization of enrichment results
+Description: 
+    Comprehensive toolkit for KEGG-based metabolite enrichment analysis and pathway visualization.
+    Key features include:
+    - Automated retrieval and caching of KEGG pathway data
+    - Hypergeometric test-based metabolite set enrichment analysis
+    - Pathway-metabolite mapping and annotation
+    - Publication-quality visualization of enrichment results
     - Analysis of shared metabolites between pathways
+    - Integration with KEGG REST API
 License: GPL-3
 Depends:
     R (>= 4.0.0)
@@ -23,9 +24,13 @@ Imports:
     scales
 Suggests: 
     knitr,
-    rmarkdown
+    rmarkdown,
+    testthat (>= 3.0.0)
 VignetteBuilder: knitr
 RoxygenNote: 7.3.2
 Encoding: UTF-8
 URL: https://github.com/maxgodson1/enrichmeta
 BugReports: https://github.com/maxgodson1/enrichmeta/issues
+SystemRequirements: libcurl
+Remotes:
+    github::maxgodson1/enrichmeta

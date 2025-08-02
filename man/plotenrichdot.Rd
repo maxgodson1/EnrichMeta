@@ -17,7 +17,7 @@ plotenrichdot(
   color_limits = c(0, 0.15),
   legend_position = "right",
   show_grid = TRUE,
-  x_expansion = c(0, 0.2),
+  x_expansion = c(0, 0.15),
   padding_right = 0.3
 )
 }
@@ -46,7 +46,7 @@ plotenrichdot(
 
 \item{show_grid}{Show horizontal grid lines? (default = TRUE)}
 
-\item{x_expansion}{Multiplicative expansion for x-axis (default = c(0, 0.2))}
+\item{x_expansion}{Multiplicative expansion for x-axis (default = c(0, 0.15))}
 
 \item{padding_right}{Additional right padding for points (default = 0.3)}
 }

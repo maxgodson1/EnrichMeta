@@ -1,97 +1,115 @@
-#' Calculate Shared Metabolites Between Pathways
+#' Calculate Shared Metabolites Between Selected Pathways
 #'
-#' Analyzes metabolite sharing between pathways without network construction.
+#' Analyzes metabolite sharing between user-specified pathways and returns a data frame of shared metabolites.
 #'
-#' @param pathway_data Pathway data from `getkeggdata()` containing:
+#' @param pathwayid Character vector of pathway IDs to analyze (e.g., "hsa00010")
+#' @param pathway_data Pathway data object from \code{\link{getkeggdata}} containing:
 #'   \itemize{
-#'     \item `pathways`: Named list of pathway names (ID:name)
-#'     \item `pathscpds`: List of compounds per pathway
+#'     \item `path_cpd_map`: List of compounds per pathway
 #'   }
 #' @param min_shared Minimum shared metabolites for inclusion (default = 1)
 #'
-#' @return A list containing:
-#'   \item{shared_df}{Data frame detailing shared metabolites between pathway pairs}
-#'   \item{pathway_names}{Named list mapping pathway IDs to names}
-#'   \item{compound_counts}{Named vector of metabolite counts per pathway}
+#' @return A data frame detailing shared metabolites between pathway pairs with columns:
+#'   \itemize{
+#'     \item from: Source pathway ID
+#'     \item to: Target pathway ID
+#'     \item shared_count: Number of shared metabolites
+#'     \item keggID: Semicolon-separated list of shared metabolite IDs
+#'   }
 #'
 #' @details
-#' Computes pairwise metabolite sharing between pathways. Returns a data frame with:
-#' \itemize{
-#'   \item from: Source pathway ID
-#'   \item to: Target pathway ID
-#'   \item shared_count: Number of shared metabolites
-#'   \item keggID: Semicolon-separated list of shared metabolite IDs
-#' }
+#' Computes pairwise metabolite sharing between user-selected pathways. Only pathway pairs with at least
+#' `min_shared` metabolites are included. Pathways are compared based on their metabolite composition.
 #'
 #' @examples
 #' \dontrun{
 #' # After enrichment analysis
-#' filtered_data <- list(
-#'   pathways = kegg_data$pathways[selected_pathways],
-#'   pathscpds = kegg_data$pathscpds[selected_pathways]
+#' kegg_data <- getkeggdata("hsa", cache_dir = "./cache")
+#' selected_paths <- c("hsa00010", "hsa00020", "hsa00030")
+#' shared_df <- findsharedcpds(
+#'   pathwayid = selected_paths,
+#'   pathway_data = kegg_data,
+#'   min_shared = 2
 #' )
-#' shared_result <- findsharedcpds(filtered_data, min_shared = 2)
 #'
 #' # View shared metabolites
-#' head(shared_result$shared_df)
+#' head(shared_df)
 #' }
 #'
 #' @export
 
-findsharedcpds <- function(pathway_data, min_shared = 1) {
-  # 提取数据
-  pathways <- pathway_data$pathways
-  pathscpds <- pathway_data$pathscpds
-  path_names <- names(pathscpds)
-
-  # 检查通路数量
-  n_paths <- length(path_names)
-  if (n_paths < 2) {
-    stop("At least two pathways are required for analysis")
+findsharedcpds <- function(pathwayid, pathway_data, min_shared = 1) {
+  # 验证输入数据
+  if (!"path_cpd_map" %in% names(pathway_data)) {
+    stop("pathway_data must contain 'path_cpd_map' element")
+  }
+  if (!is.character(pathwayid)) {
+    stop("pathwayid must be a character vector")
   }
 
-  # 创建邻接矩阵
-  adj_matrix <- matrix(0, nrow = n_paths, ncol = n_paths,
-                       dimnames = list(path_names, path_names))
+  # 获取指定通路的代谢物映射
+  path_cpd_map <- pathway_data$path_cpd_map
 
-  # 存储共享代谢物详细信息
+  # 查找有效通路 - 直接匹配ID
+  valid_paths <- pathwayid[pathwayid %in% names(path_cpd_map)]
+
+  # 检查无效通路ID
+  if (length(valid_paths) != length(pathwayid)) {
+    invalid <- setdiff(pathwayid, names(path_cpd_map))
+    warning("Ignoring invalid pathway IDs: ", paste(invalid, collapse = ", "))
+  }
+
+  # 检查有效通路数量
+  n_paths <- length(valid_paths)
+  if (n_paths < 2) {
+    message("At least two valid pathways are required. Returning empty data frame.")
+    return(data.frame(
+      from = character(),
+      to = character(),
+      shared_count = integer(),
+      keggID = character(),
+      stringsAsFactors = FALSE
+    ))
+  }
+
+  # 预分配结果列表
   shared_list <- list()
 
-  # 填充共享代谢物计数和详细信息
+  # 计算共享代谢物
   for (i in 1:(n_paths - 1)) {
-    cmpds_i <- pathscpds[[path_names[i]]]
+    path1 <- valid_paths[i]
+    cmpds1 <- path_cpd_map[[path1]]
+
     for (j in (i + 1):n_paths) {
-      shared <- intersect(cmpds_i, pathscpds[[path_names[j]]])
+      path2 <- valid_paths[j]
+      cmpds2 <- path_cpd_map[[path2]]
+
+      shared <- intersect(cmpds1, cmpds2)
       count <- length(shared)
 
       if (count >= min_shared) {
-        adj_matrix[i, j] <- count
-        adj_matrix[j, i] <- count
-
-        # 存储共享代谢物详细信息
-        edge_id <- paste(sort(c(path_names[i], path_names[j])), collapse = "|")
-        shared_list[[edge_id]] <- data.frame(
-          from = path_names[i],
-          to = path_names[j],
+        shared_list[[length(shared_list) + 1]] <- data.frame(
+          from = path1,
+          to = path2,
           shared_count = count,
-          keggID = paste(shared, collapse = ";")
+          keggID = paste(shared, collapse = ";"),
+          stringsAsFactors = FALSE
         )
       }
     }
   }
 
-
-  # 计算每个通路的代谢物数量
-  compound_counts <- sapply(pathscpds[path_names], length)
-  names(compound_counts) <- path_names
-
   # 返回结果
-  shared_df <- if (length(shared_list) > 0) do.call(rbind, shared_list) else NULL
-  rownames(shared_df) <- NULL
-
-  list(
-    shared_df = shared_df,
-    pathway_names = pathways,
-    compound_counts = compound_counts
-  )
+  if (length(shared_list) > 0) {
+    return(do.call(rbind, shared_list))
+  } else {
+    message("No pathway pairs found with >= ", min_shared, " shared metabolites.")
+    return(data.frame(
+      from = character(),
+      to = character(),
+      shared_count = integer(),
+      keggID = character(),
+      stringsAsFactors = FALSE
+    ))
+  }
 }

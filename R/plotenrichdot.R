@@ -14,7 +14,7 @@
 #' @param color_limits Color scale limits (default = c(0, 0.15))
 #' @param legend_position Legend position ("none", "left", "right", "bottom", "top"; default = "right")
 #' @param show_grid Show horizontal grid lines? (default = TRUE)
-#' @param x_expansion Multiplicative expansion for x-axis (default = c(0, 0.2))
+#' @param x_expansion Multiplicative expansion for x-axis (default = c(0, 0.15))
 #' @param padding_right Additional right padding for points (default = 0.3)
 #'
 #' @return A ggplot2 object
@@ -51,26 +51,26 @@
 #' @export
 
 plotenrichdot <- function(results,
-                      top = 25,
-                      title = "Enriched Metabolic Pathways",
-                      low_color = "#FF0000",
-                      high_color = "#FFFF00",
-                      point_size_range = c(3, 8),
-                      point_alpha = 0.8,
-                      base_size = 12,
-                      wrap_width = 40,
-                      color_limits = c(0, 0.15),
-                      legend_position = "right",
-                      show_grid = TRUE,
-                      x_expansion = c(0, 0.2),
-                      padding_right = 0.3) {
+                          top = 25,
+                          title = "Enriched Metabolic Pathways",
+                          low_color = "#FF0000",
+                          high_color = "#FFFF00",
+                          point_size_range = c(3, 8),
+                          point_alpha = 0.8,
+                          base_size = 12,
+                          wrap_width = 40,
+                          color_limits = c(0, 0.15),
+                          legend_position = "right",
+                          show_grid = TRUE,
+                          x_expansion = c(0, 0.15),
+                          padding_right = 0.3) {
 
   # 检查必要包
   if (!requireNamespace("ggplot2", quietly = TRUE)) {
-    stop("请先安装ggplot2包：install.packages('ggplot2')")
+    stop("Please install the ggplot2 package first: install.packages('ggplot2')")
   }
   if (!requireNamespace("stringr", quietly = TRUE)) {
-    stop("请先安装stringr包：install.packages('stringr')")
+    stop("Please install the 'stringr' package first: install.packages('stringr')")
   }
 
   # 按校正p值升序排序
@@ -81,6 +81,10 @@ plotenrichdot <- function(results,
     results <- results[1:top, ]
   }
 
+  # 处理pvalue=0的情况（防止无限大值）
+  results$pvalue_plot <- results$pvalue
+  results$pvalue_plot[results$pvalue_plot == 0] <- .Machine$double.xmin
+
   # 处理长标签
   results$Description <- stringr::str_wrap(results$Description, width = wrap_width)
 
@@ -89,16 +93,14 @@ plotenrichdot <- function(results,
     results$Description,
     levels = rev(unique(results$Description)))
 
-  # 计算x轴的最大值（考虑点的大小）
-  max_x_value <- max(-log10(results$pvalue))
+  # 计算x轴的最大值
+  max_x_value <- max(-log10(results$pvalue_plot))
   max_point_size <- max(point_size_range)
-
-  # 计算需要扩展的空间（基于点的大小）
   x_max_limit <- max_x_value + (max_point_size * 0.005) + padding_right
 
   # 创建基础绘图
   p <- ggplot2::ggplot(results,
-                       ggplot2::aes(x = -log10(pvalue),
+                       ggplot2::aes(x = -log10(pvalue_plot),
                                     y = Description,
                                     size = EnrichmentRatio,
                                     color = pvalue)) +
@@ -106,9 +108,9 @@ plotenrichdot <- function(results,
     ggplot2::scale_color_gradient(
       low = low_color,
       high = high_color,
-      limits = c(0, 0.2),  # 固定颜色范围为0-0.2
-      breaks = seq(0, 0.2, by = 0.05),  # 设置固定刻度
-      labels = function(x) sprintf("%.2f", x),  # 格式化标签显示两位小数
+      limits = color_limits,
+      breaks = seq(min(color_limits), max(color_limits), length.out = 5),
+      labels = function(x) sprintf("%.3f", x),
       name = "P-value"
     ) +
     ggplot2::scale_size_continuous(
@@ -149,7 +151,7 @@ plotenrichdot <- function(results,
     ) +
     ggplot2::scale_x_continuous(
       expand = ggplot2::expansion(mult = x_expansion),
-      limits = c(0, x_max_limit))  # 设置x轴上限
+      limits = c(0, x_max_limit))
 
   # 条件添加网格线
   if(show_grid) {

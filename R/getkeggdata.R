@@ -8,7 +8,7 @@
 #'
 #' @return A list containing three elements:
 #'   \item{pathways}{Named vector mapping pathway IDs to pathway names (e.g. list("hsa00010" = "Glycolysis"))}
-#'   \item{pathscpds}{List mapping pathway IDs to vectors of compound IDs (e.g. list("hsa00010" = c("C00022", "C00031")))}
+#'   \item{path_cpd_map}{List mapping pathway IDs to vectors of compound IDs (e.g. list("hsa00010" = c("C00022", "C00031")))}
 #'   \item{compounds}{Named list mapping compound IDs to compound names (e.g. list("C00022" = "Pyruvate; Pyruvic acid"))}
 #'
 #' @details
@@ -35,7 +35,7 @@
 #' kegg_data <- getkeggdata("hsa", cache_dir = "./kegg_cache")
 #'
 #' # Access glycolysis compounds
-#' glycolysis_cpds <- kegg_data$pathscpds$hsa00010
+#' glycolysis_cpds <- kegg_data$path_cpd_map$hsa00010
 #'
 #' # Get pyruvate names
 #' kegg_data$compounds$C00022
@@ -62,7 +62,7 @@ getkeggdata <- function(species, cache_dir) {
     message("正在加载缓存中的通路数据...")
     pathway_data <- readRDS(cache_file)
     message(sprintf("加载了 %d 条通路和 %d 个化合物",
-                    length(pathway_data$pathscpds),
+                    length(pathway_data$path_cpd_map),
                     length(pathway_data$compounds)))
   } else {
     # 从KEGG获取新数据
@@ -75,7 +75,7 @@ getkeggdata <- function(species, cache_dir) {
     # 获取通路中的化合物
     message("获取通路中的化合物...")
     pb <- utils::txtProgressBar(min = 0, max = length(path_ids), style = 3)
-    pathscpds <- list()
+    path_cpd_map <- list()
 
     for (i in seq_along(path_ids)) {
       pid <- path_ids[i]
@@ -84,7 +84,7 @@ getkeggdata <- function(species, cache_dir) {
       if (!is.null(entry) && !is.null(entry$COMPOUND)) {
         # 移除"cpd:"前缀
         compound_ids <- sub("cpd:", "", names(entry$COMPOUND))
-        pathscpds[[pid]] <- compound_ids
+        path_cpd_map[[pid]] <- compound_ids
       }
       utils::setTxtProgressBar(pb, i)
     }
@@ -95,7 +95,7 @@ getkeggdata <- function(species, cache_dir) {
     names(pathways_list) <- path_ids
 
     # 获取所有唯一化合物ID
-    all_compound_ids <- unique(unlist(pathscpds, use.names = FALSE))
+    all_compound_ids <- unique(unlist(path_cpd_map, use.names = FALSE))
 
     # 创建化合物ID->名称映射（逐个获取）
     compounds <- list()
@@ -108,10 +108,16 @@ getkeggdata <- function(species, cache_dir) {
         cid <- all_compound_ids[i]
 
         # 逐个获取化合物信息
-        result <- tryCatch(
-          KEGGREST::keggGet(paste0("cpd:", cid))[[1]],
-          error = function(e) NULL
-        )
+        result <- tryCatch({
+          attempt <- 1
+          while(attempt <= 3) {
+            res <- KEGGREST::keggGet(paste0("cpd:", cid))
+            if (!is.null(res)) break
+            attempt <- attempt + 1
+            Sys.sleep(1)  # 等待1秒后重试
+          }
+          res[[1]]
+        }, error = function(e) NULL)
 
         # 提取名称
         if (!is.null(result)) {
@@ -135,14 +141,14 @@ getkeggdata <- function(species, cache_dir) {
     # 构建返回对象
     pathway_data <- list(
       pathways = pathways_list,  # 通路ID->名称（列表）
-      pathscpds = pathscpds,     # 通路ID->化合物ID列表（列表）
+      path_cpd_map = path_cpd_map,     # 通路ID->化合物ID列表（列表）
       compounds = compounds       # 化合物ID->名称（列表）
     )
 
     # 保存缓存
     saveRDS(pathway_data, cache_file)
     message(sprintf("已缓存 %d 条通路和 %d 个化合物",
-                    length(pathscpds),
+                    length(path_cpd_map),
                     length(compounds)))
   }
 

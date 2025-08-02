@@ -3,9 +3,6 @@
 #' Conducts metabolite set enrichment analysis using KEGG pathways and hypergeometric test
 #'
 #' @param keggid Character vector of metabolite KEGG IDs (e.g., c("C00022", "C00031")).
-#'                Must be in short format (without "cpd:" prefix).
-#' @param species KEGG species code (e.g., "hsa" for human). Must match the species used
-#'                in \code{pathway_data}.
 #' @param pathway_data Pathway data object from \code{\link{getkeggdata}}
 #' @param p.adjust.method p-value adjustment method (default="BH"). Options: "holm", "hochberg",
 #'                        "hommel", "bonferroni", "BH", "BY", "fdr".
@@ -43,7 +40,6 @@
 #' sig_metabolites <- c("C00022", "C00031", "C00033")
 #' enrich_results <- enrichkegg(
 #'   keggid = sig_metabolites,
-#'   species = "hsa",
 #'   pathway_data = kegg_data
 #' )
 #'
@@ -52,28 +48,32 @@
 #' }
 #' @export
 
-enrichkegg <- function(keggid, species, pathway_data, p.adjust.method = "BH") {
+enrichkegg <- function(keggid,pathway_data, p.adjust.method = "BH") {
+
+  # 验证必须参数
+  if (missing(keggid)) stop("Missing required argument: keggid")
+  if (missing(pathway_data)) stop("Missing required argument: pathway_data")
 
   # 获取通路数据
   pathways <- pathway_data$pathways
-  pathscpds <- pathway_data$pathscpds
+  path_cpd_map <- pathway_data$path_cpd_map
 
   # 准备富集分析
-  all_cmpds <- unique(unlist(pathscpds))
+  all_cmpds <- unique(unlist(path_cpd_map))
   N <- length(keggid)  # 输入的代谢物数量
   M <- length(all_cmpds)  # 背景代谢物总数
 
   # 预分配结果列表
-  results_list <- vector("list", length(pathscpds))
+  results_list <- vector("list", length(path_cpd_map))
   valid_count <- 0
 
   # 进度条：执行富集分析
   message("\nPerforming enrichment analysis...")
-  pb <- utils::txtProgressBar(min = 0, max = length(pathscpds), style = 3)
+  pb <- utils::txtProgressBar(min = 0, max = length(path_cpd_map), style = 3)
 
-  for (i in seq_along(pathscpds)) {
-    pid <- names(pathscpds)[i]
-    pw_cmpds <- pathscpds[[pid]]
+  for (i in seq_along(path_cpd_map)) {
+    pid <- names(path_cpd_map)[i]
+    pw_cmpds <- path_cpd_map[[pid]]
     overlap <- intersect(keggid, pw_cmpds)
     k <- length(overlap)  # 显著代谢物在通路中的数量
     n <- length(pw_cmpds)  # 通路中的代谢物总数
@@ -81,6 +81,13 @@ enrichkegg <- function(keggid, species, pathway_data, p.adjust.method = "BH") {
     if (k > 0) {
       valid_count <- valid_count + 1
       p <- phyper(k - 1, n, M - n, N, lower.tail = FALSE)
+
+      # 检查p-value是否有效
+      if (is.na(p) || is.nan(p)) {
+        warning(sprintf("p-value calculation failed for pathway %s. Setting p-value to 1.0", pid))
+        p <- 1.0
+      }
+
       enrich_ratio <- (k * M) / (n * N)
 
       # 获取通路名称

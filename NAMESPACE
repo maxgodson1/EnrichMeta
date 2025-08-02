@@ -3,6 +3,7 @@
 export(enrichkegg)
 export(findcpdsnames)
 export(findcpdspaths)
+export(findpathscpds)
 export(findpathsnames)
 export(findsharedcpds)
 export(getkeggdata)

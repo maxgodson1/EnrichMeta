@@ -14,7 +14,7 @@ getkeggdata(species, cache_dir)
 \value{
 A list containing three elements:
   \item{pathways}{Named vector mapping pathway IDs to pathway names (e.g. list("hsa00010" = "Glycolysis"))}
-  \item{pathscpds}{List mapping pathway IDs to vectors of compound IDs (e.g. list("hsa00010" = c("C00022", "C00031")))}
+  \item{path_cpd_map}{List mapping pathway IDs to vectors of compound IDs (e.g. list("hsa00010" = c("C00022", "C00031")))}
   \item{compounds}{Named list mapping compound IDs to compound names (e.g. list("C00022" = "Pyruvate; Pyruvic acid"))}
 }
 \description{
@@ -45,7 +45,7 @@ API queries may take 2-5 minutes for species with many pathways (e.g., human has
 kegg_data <- getkeggdata("hsa", cache_dir = "./kegg_cache")
 
 # Access glycolysis compounds
-glycolysis_cpds <- kegg_data$pathscpds$hsa00010
+glycolysis_cpds <- kegg_data$path_cpd_map$hsa00010
 
 # Get pyruvate names
 kegg_data$compounds$C00022

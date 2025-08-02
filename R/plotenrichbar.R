@@ -12,7 +12,7 @@
 #' @param base_size Base font size for the plot (default = 12)
 #' @param wrap_width Number of characters per line for wrapping pathway descriptions (default = 40)
 #' @param show_ratio Logical indicating whether to display enrichment ratio values on the bars (default = TRUE)
-#' @param color_limits Range of p-values for the color scale (default = c(0, 0.2))
+#' @param color_limits Range of p-values for the color scale (default = c(0, 0.15))
 #' @param legend_position Position of the legend ("none", "left", "right", "bottom", "top", or two-element numeric vector; default = "right")
 #'
 #' @return A ggplot2 object representing the enrichment bar plot.
@@ -65,7 +65,7 @@ plotenrichbar <- function(results,
                       base_size = 12,
                       wrap_width = 40,
                       show_ratio = TRUE,
-                      color_limits = c(0, 0.2),
+                      color_limits = c(0, 0.15),
                       legend_position = "right") {
 
   # 筛选并排序数据
@@ -137,7 +137,7 @@ plotenrichbar <- function(results,
     p <- p + ggplot2::geom_text(
       ggplot2::aes(label = sprintf("%.1f", EnrichmentRatio)),
       hjust = -0.2,
-      size = base_size - 8.5,
+      size = base_size / 4,
       color = "black",
       fontface = "bold"
     )

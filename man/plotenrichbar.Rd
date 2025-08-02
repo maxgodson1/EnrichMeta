@@ -14,7 +14,7 @@ plotenrichbar(
   base_size = 12,
   wrap_width = 40,
   show_ratio = TRUE,
-  color_limits = c(0, 0.2),
+  color_limits = c(0, 0.15),
   legend_position = "right"
 )
 }
@@ -38,7 +38,7 @@ Must contain columns: `Description`, `EnrichmentRatio`, `pvalue`, `p.adjust`.}
 
 \item{show_ratio}{Logical indicating whether to display enrichment ratio values on the bars (default = TRUE)}
 
-\item{color_limits}{Range of p-values for the color scale (default = c(0, 0.2))}
+\item{color_limits}{Range of p-values for the color scale (default = c(0, 0.15))}
 
 \item{legend_position}{Position of the legend ("none", "left", "right", "bottom", "top", or two-element numeric vector; default = "right")}
 }

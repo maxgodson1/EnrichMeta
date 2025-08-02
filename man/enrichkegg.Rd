@@ -4,14 +4,10 @@
 \alias{enrichkegg}
 \title{Perform KEGG Metabolite Enrichment Analysis}
 \usage{
-enrichkegg(keggid, species, pathway_data, p.adjust.method = "BH")
+enrichkegg(keggid, pathway_data, p.adjust.method = "BH")
 }
 \arguments{
-\item{keggid}{Character vector of metabolite KEGG IDs (e.g., c("C00022", "C00031")).
-Must be in short format (without "cpd:" prefix).}
-
-\item{species}{KEGG species code (e.g., "hsa" for human). Must match the species used
-in \code{pathway_data}.}
+\item{keggid}{Character vector of metabolite KEGG IDs (e.g., c("C00022", "C00031")).}
 
 \item{pathway_data}{Pathway data object from \code{\link{getkeggdata}}}
 
@@ -55,7 +51,6 @@ Results are sorted by adjusted p-value in ascending order.
 sig_metabolites <- c("C00022", "C00031", "C00033")
 enrich_results <- enrichkegg(
   keggid = sig_metabolites,
-  species = "hsa",
   pathway_data = kegg_data
 )
 

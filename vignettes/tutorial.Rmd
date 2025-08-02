@@ -1,154 +1,145 @@
 ---
-title: "enrichmeta包使用教程"
+title: "enrichmeta Tutorial: Metabolite Enrichment Analysis with KEGG Pathways"
 author: "Botao Zhang"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{enrichmeta包使用教程}
+  %\VignetteIndexEntry{enrichmeta Tutorial}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r setup, include=FALSE}
+```{r setup, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>",
-  fig.width = 7,
-  fig.height = 5
+  comment = "#>"
 )
 ```
 
-# enrichmeta: KEGG代谢物富集分析工具包
+## Introduction
 
-enrichmeta是一个用于KEGG代谢通路富集分析的R包，提供从数据获取、富集分析到结果可视化的完整工作流。
+The `enrichmeta` package provides tools for metabolite enrichment analysis using KEGG pathways. This tutorial demonstrates the main functionality:
 
-## 1. 安装
+1. Retrieving KEGG pathway data with caching
+2. Performing enrichment analysis
+3. Visualizing results
+4. Analyzing shared metabolites between pathways
 
-```r
-# 从GitHub安装
-# install.packages("devtools")
-devtools::install_github("yourusername/enrichmeta")
+## Installation
+
+```{r install, eval = FALSE}
+# Install from GitHub
+devtools::install_github("maxgodson1/enrichmeta")
 ```
 
-## 2. 加载包
+## Load Package
 
-```{r load-package}
+```{r library}
 library(enrichmeta)
 ```
 
-## 3. 获取KEGG通路数据
+## Step 1: Get KEGG Pathway Data
 
-使用`getkeggdata()`函数获取并缓存物种特异的KEGG通路数据：
+Use `getkeggdata()` to retrieve pathway data for a species. Data is cached locally for future use.
 
-```{r get-kegg-data, eval=FALSE}
-# 获取斑马鱼(dre)的KEGG通路数据
-kegg_data <- getkeggdata("dre", cache_dir = "F:/data/Kegg/")
+```{r get_data}
+# Get data for zebrafish (Danio rerio)
+kegg_data <- getkeggdata("dre", cache_dir = "./kegg_cache")
+
+# Explore data structure
+names(kegg_data)
 ```
 
-## 4. 代谢物富集分析
+- `pathways`: Named list of pathway names (ID -> name)
+- `path_cpd_map`: List of metabolites per pathway (ID -> vector of compounds)
+- `compounds`: Named list of compound names (ID -> name)
 
-使用`enrichkegg()`对显著代谢物进行富集分析：
+## Step 2: Enrichment Analysis
 
-```{r enrichment-analysis, eval=FALSE}
-# 定义显著代谢物列表
-significant_metabolites <- c("C00187", "C00245", "C00641")
+Perform enrichment analysis with `enrichkegg()` using a set of metabolite KEGG IDs.
 
-# 执行富集分析
+```{r enrichment}
+# Example metabolite IDs (Pyruvate, Lactate, etc.)
+sig_metabolites <- c("C00022", "C00031", "C00186", "C00256", "C00041")
+
+# Run enrichment
 enrich_results <- enrichkegg(
-  keggid = significant_metabolites,
-  species = "dre",
+  keggid = sig_metabolites,
   pathway_data = kegg_data
 )
 
-# 查看结果
+# View results (sorted by adjusted p-value)
 head(enrich_results)
 ```
 
-## 5. 可视化富集结果
+## Step 3: Visualize Enrichment Results
 
-### 5.1 点图可视化
+### Bar Plot
 
-```{r dot-plot, eval=FALSE}
-plotenrichdot(
-  results = enrich_results,
-  top = 15,
-  title = "斑马鱼代谢通路富集分析",
-  low_color = "red",
-  point_size_range = c(3, 10),
-  base_size = 14
-)
-```
-
-### 5.2 条形图可视化
-
-```{r bar-plot, eval=FALSE}
+```{r bar_plot, fig.width=8, fig.height=6}
 plotenrichbar(
   results = enrich_results,
   top = 10,
-  title = "Top富集通路",
-  low_color = "darkred",
-  bar_width = 0.7,
-  base_size = 14
+  title = "Top Enriched Pathways in Zebrafish"
 )
 ```
 
-## 6. 通路间共享代谢物分析
+### Dot Plot
 
-```{r shared-metabolites, eval=FALSE}
-# 选择感兴趣的代谢通路
-selected_pathways <- c("dre00010", "dre00020", "dre00030")
+```{r dot_plot, fig.width=8, fig.height=6}
+plotenrichdot(
+  results = enrich_results,
+  top = 10,
+  title = "Enriched Pathways in Zebrafish"
+)
+```
 
-# 筛选数据
-filtered_data <- list(
-  pathways = kegg_data$pathways[selected_pathways],
-  pathscpds = kegg_data$pathscpds[selected_pathways]
+## Step 4: Pathway-Metabolite Mapping
+
+### Find Pathways for Metabolites
+
+```{r find_paths}
+# Get pathways containing specific metabolites
+metab_paths <- findcpdspaths(c("C00022", "C00031"), pathway_data = kegg_data)
+metab_paths
+```
+
+### Find Metabolites in Pathways
+
+```{r find_cpds}
+# Get metabolites in specific pathways
+path_cpds <- findpathscpds(c("dre00010", "dre00020"), pathway_data = kegg_data)
+head(path_cpds)
+```
+
+## Step 5: Shared Metabolites Between Pathways
+
+Analyze metabolite sharing between enriched pathways:
+
+```{r shared_cpds}
+# Get top 5 enriched pathway IDs
+top_paths <- head(enrich_results$pathwayID, 5)
+
+# Find shared metabolites
+shared_df <- findsharedcpds(
+  pathwayid = top_paths,
+  pathway_data = kegg_data,
+  min_shared = 1
 )
 
-# 计算共享代谢物
-shared_result <- findsharedcpds(filtered_data, min_shared = 1)
+# View results
+head(shared_df)
 
-# 查看共享详情
-print(shared_result$shared_df)
+# Map compound IDs to names
+if (nrow(shared_df) > 0) {
+  shared_metabs <- unique(unlist(strsplit(shared_df$keggID, ";")))
+  findcpdsnames(shared_metabs, kegg_data)
+}
 ```
 
-## 7. 代谢物-通路映射
+## Conclusion
 
-### 7.1 根据代谢物查找通路
-
-```{r find-paths-by-compounds, eval=FALSE}
-metabolite_pathways <- findcpdspaths(
-  c("C00031", "C00221", "C00118"),
-  pathway_data = kegg_data
-)
-
-# 查看结果
-head(metabolite_pathways)
+This tutorial covered the core functionality of `enrichmeta`. For advanced usage, see the function documentation:
+```{r help, eval=FALSE}
+help(package = "enrichmeta")
 ```
-
-### 7.2 根据通路ID查找名称
-
-```{r find-path-names, eval=FALSE}
-path_ids <- c("dre00010", "dre00020", "dre00030")
-path_names <- findpathsnames(path_ids, kegg_data)
-path_names
-```
-
-### 7.3 根据代谢物ID查找名称
-
-```{r find-compound-names, eval=FALSE}
-kegg_ids <- c("C00187", "C00245", "C00641")
-compound_names <- findcpdsnames(kegg_ids, kegg_data)
-compound_names
-```
-
-## 8. 总结
-
-enrichmeta包提供了完整的KEGG代谢物富集分析解决方案：
-
-1. **数据获取**：自动下载并缓存KEGG通路数据
-2. **富集分析**：基于超几何检验的代谢通路富集
-3. **可视化**：点图和条形图展示富集结果
-4. **通路分析**：通路间共享代谢物识别
-5. **ID转换**：代谢物/通路ID与名称的相互转换
-
-这个工具包特别适合代谢组学研究中通路富集分析的需求。

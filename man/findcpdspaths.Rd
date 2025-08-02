@@ -7,18 +7,17 @@
 findcpdspaths(keggid, pathway_data)
 }
 \arguments{
-\item{keggid}{Vector of metabolite KEGG IDs (e.g., c("C00160", "C00041"))}
+\item{keggid}{Character vector of metabolite KEGG IDs (e.g., c("C00160", "C00041"))}
 
-\item{pathway_data}{Pathway data obtained from `getkeggdata()`}
+\item{pathway_data}{Pathway data object from \code{\link{getkeggdata}}}
 }
 \value{
-A data frame with three columns:
+A data frame with two columns:
   \itemize{
     \item \code{keggID}: KEGG ID of the metabolite
     \item \code{pathwayID}: KEGG pathway ID containing the metabolite
-    \item \code{Description}: Full name of the pathway
   }
-  Rows are ordered by keggid and pathwayID. Metabolites not found in any pathways are excluded.
+  Rows are ordered by keggID and pathwayID. Metabolites not found in any pathways are excluded.
 }
 \description{
 Identifies which KEGG pathways contain the specified metabolites.
@@ -26,12 +25,13 @@ Identifies which KEGG pathways contain the specified metabolites.
 \details{
 This function checks the provided pathway data to determine which pathways contain each input metabolite.
 The result provides a comprehensive mapping between metabolites and their associated pathways.
+
+For large datasets (more than 50 metabolites), a progress bar is displayed to track processing status.
 }
 \note{
 The pathway_data object must contain:
 \itemize{
-  \item \code{pathways}: Named list mapping pathway IDs to pathway names
-  \item \code{pathscpds}: List mapping pathway IDs to vectors of compound IDs
+  \item \code{path_cpd_map}: List mapping pathway IDs to vectors of compound IDs
 }
 }
 \examples{
@@ -40,7 +40,10 @@ The pathway_data object must contain:
 kegg_data <- getkeggdata("hsa", cache_dir = "./cache")
 
 # Get pathway information for metabolites
-findcpdspaths(c("C00031", "C00221"), pathway_data = kegg_data)
+metabolite_pathways <- findcpdspaths(c("C00031", "C00221"), pathway_data = kegg_data)
+
+# View results
+head(metabolite_pathways)
 }
 
 }

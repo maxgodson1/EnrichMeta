@@ -4,12 +4,12 @@
 \alias{findcpdsnames}
 \title{Map Compound IDs to Compound Names}
 \usage{
-findcpdsnames(keggid, pathways_data)
+findcpdsnames(keggid, pathway_data)
 }
 \arguments{
 \item{keggid}{Character vector of KEGG compound IDs (e.g., c("C00031", "C00022"))}
 
-\item{pathways_data}{Pathway data object from `getkeggdata()`}
+\item{pathway_data}{Pathway data object from \code{\link{getkeggdata}}}
 }
 \value{
 A data frame with two columns:
@@ -24,6 +24,6 @@ Retrieves compound names for given KEGG compound IDs using cached data.
 \examples{
 \dontrun{
 kegg_data <- getkeggdata("hsa", cache_dir = "./cache")
-findcpdsnames(c("C00031", "C00022"), pathways_data = kegg_data)
+findcpdsnames(c("C00031", "C00022"), pathway_data = kegg_data)
 }
 }

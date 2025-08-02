@@ -2,48 +2,49 @@
 % Please edit documentation in R/findsharedcpds.R
 \name{findsharedcpds}
 \alias{findsharedcpds}
-\title{Calculate Shared Metabolites Between Pathways}
+\title{Calculate Shared Metabolites Between Selected Pathways}
 \usage{
-findsharedcpds(pathway_data, min_shared = 1)
+findsharedcpds(pathwayid, pathway_data, min_shared = 1)
 }
 \arguments{
-\item{pathway_data}{Pathway data from `getkeggdata()` containing:
+\item{pathwayid}{Character vector of pathway IDs to analyze (e.g., "hsa00010")}
+
+\item{pathway_data}{Pathway data object from \code{\link{getkeggdata}} containing:
 \itemize{
-  \item `pathways`: Named list of pathway names (ID:name)
-  \item `pathscpds`: List of compounds per pathway
+  \item `path_cpd_map`: List of compounds per pathway
 }}
 
 \item{min_shared}{Minimum shared metabolites for inclusion (default = 1)}
 }
 \value{
-A list containing:
-  \item{shared_df}{Data frame detailing shared metabolites between pathway pairs}
-  \item{pathway_names}{Named list mapping pathway IDs to names}
-  \item{compound_counts}{Named vector of metabolite counts per pathway}
+A data frame detailing shared metabolites between pathway pairs with columns:
+  \itemize{
+    \item from: Source pathway ID
+    \item to: Target pathway ID
+    \item shared_count: Number of shared metabolites
+    \item keggID: Semicolon-separated list of shared metabolite IDs
+  }
 }
 \description{
-Analyzes metabolite sharing between pathways without network construction.
+Analyzes metabolite sharing between user-specified pathways and returns a data frame of shared metabolites.
 }
 \details{
-Computes pairwise metabolite sharing between pathways. Returns a data frame with:
-\itemize{
-  \item from: Source pathway ID
-  \item to: Target pathway ID
-  \item shared_count: Number of shared metabolites
-  \item keggID: Semicolon-separated list of shared metabolite IDs
-}
+Computes pairwise metabolite sharing between user-selected pathways. Only pathway pairs with at least
+`min_shared` metabolites are included. Pathways are compared based on their metabolite composition.
 }
 \examples{
 \dontrun{
 # After enrichment analysis
-filtered_data <- list(
-  pathways = kegg_data$pathways[selected_pathways],
-  pathscpds = kegg_data$pathscpds[selected_pathways]
+kegg_data <- getkeggdata("hsa", cache_dir = "./cache")
+selected_paths <- c("hsa00010", "hsa00020", "hsa00030")
+shared_df <- findsharedcpds(
+  pathwayid = selected_paths,
+  pathway_data = kegg_data,
+  min_shared = 2
 )
-shared_result <- findsharedcpds(filtered_data, min_shared = 2)
 
 # View shared metabolites
-head(shared_result$shared_df)
+head(shared_df)
 }
 
 }
