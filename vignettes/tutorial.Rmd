@@ -1,5 +1,5 @@
 ---
-title: "enrichmeta Tutorial: Metabolite Enrichment Analysis with KEGG Pathways"
+title: "enrichmeta Tutorial: Comprehensive Metabolite Enrichment Analysis with KEGG Pathways"
 author: "Botao Zhang"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
@@ -18,12 +18,14 @@ knitr::opts_chunk$set(
 
 ## Introduction
 
-The `enrichmeta` package provides tools for metabolite enrichment analysis using KEGG pathways. This tutorial demonstrates the main functionality:
+The `enrichmeta` package provides a comprehensive toolkit for metabolite enrichment analysis using KEGG pathways. This tutorial demonstrates all core functionality:
 
 1. Retrieving KEGG pathway data with caching
 2. Performing enrichment analysis
 3. Visualizing results
-4. Analyzing shared metabolites between pathways
+4. Pathway-metabolite mapping
+5. Pathway name annotation
+6. Analyzing shared metabolites between pathways
 
 ## Installation
 
@@ -47,9 +49,14 @@ Use `getkeggdata()` to retrieve pathway data for a species. Data is cached local
 kegg_data <- getkeggdata("dre", cache_dir = "./kegg_cache")
 
 # Explore data structure
-names(kegg_data)
+str(kegg_data, max.level = 1)
+
+# Number of pathways and compounds
+cat("Pathways:", length(kegg_data$pathways), "\n")
+cat("Compounds:", length(kegg_data$compounds), "\n")
 ```
 
+Data structure:
 - `pathways`: Named list of pathway names (ID -> name)
 - `path_cpd_map`: List of metabolites per pathway (ID -> vector of compounds)
 - `compounds`: Named list of compound names (ID -> name)
@@ -59,17 +66,18 @@ names(kegg_data)
 Perform enrichment analysis with `enrichkegg()` using a set of metabolite KEGG IDs.
 
 ```{r enrichment}
-# Example metabolite IDs (Pyruvate, Lactate, etc.)
-sig_metabolites <- c("C00022", "C00031", "C00186", "C00256", "C00041")
+# Example metabolite IDs (significant metabolites from your study)
+sig_metabolites <- c("C00022", "C00024", "C00031", "C00033", "C00036",
+                    "C00041", "C00042", "C00068", "C00074", "C00149")
 
-# Run enrichment
+# Run enrichment analysis
 enrich_results <- enrichkegg(
   keggid = sig_metabolites,
   pathway_data = kegg_data
 )
 
-# View results (sorted by adjusted p-value)
-head(enrich_results)
+# View top results
+head(enrich_results, 5)
 ```
 
 ## Step 3: Visualize Enrichment Results
@@ -80,7 +88,9 @@ head(enrich_results)
 plotenrichbar(
   results = enrich_results,
   top = 10,
-  title = "Top Enriched Pathways in Zebrafish"
+  title = "Top Enriched Pathways in Zebrafish",
+  low_color = "#e41a1c",  # Red for significant
+  high_color = "#ffffcc" # Light yellow for non-significant
 )
 ```
 
@@ -90,7 +100,9 @@ plotenrichbar(
 plotenrichdot(
   results = enrich_results,
   top = 10,
-  title = "Enriched Pathways in Zebrafish"
+  title = "Enriched Pathways in Zebrafish",
+  low_color = "#e41a1c",
+  point_size_range = c(4, 10)
 )
 ```
 
@@ -101,7 +113,7 @@ plotenrichdot(
 ```{r find_paths}
 # Get pathways containing specific metabolites
 metab_paths <- findcpdspaths(c("C00022", "C00031"), pathway_data = kegg_data)
-metab_paths
+head(metab_paths)
 ```
 
 ### Find Metabolites in Pathways
@@ -112,9 +124,33 @@ path_cpds <- findpathscpds(c("dre00010", "dre00020"), pathway_data = kegg_data)
 head(path_cpds)
 ```
 
-## Step 5: Shared Metabolites Between Pathways
+## Step 5: Annotate Pathway and Metabolite Names
 
-Analyze metabolite sharing between enriched pathways:
+### Map Pathway IDs to Names
+
+```{r pathway_names}
+# Get top 10 enriched pathway IDs
+top_paths <- head(enrich_results$pathwayID, 10)
+
+# Map to pathway names
+path_names <- findpathsnames(top_paths, pathway_data = kegg_data)
+path_names
+```
+
+### Map Metabolite IDs to Names
+
+```{r compound_names}
+# Extract metabolite IDs from enrichment results
+all_metabs <- unique(unlist(strsplit(enrich_results$keggID, "; ")))
+
+# Map to compound names
+compound_names <- findcpdsnames(all_metabs, pathway_data = kegg_data)
+head(compound_names)
+```
+
+## Step 6: Shared Metabolites Between Pathways
+
+Analyze metabolite sharing between pathways:
 
 ```{r shared_cpds}
 # Get top 5 enriched pathway IDs
@@ -124,22 +160,83 @@ top_paths <- head(enrich_results$pathwayID, 5)
 shared_df <- findsharedcpds(
   pathwayid = top_paths,
   pathway_data = kegg_data,
-  min_shared = 1
+  min_shared = 2  # Only show pairs with ≥2 shared metabolites
 )
 
-# View results
-head(shared_df)
+# View raw results
+shared_df
 
-# Map compound IDs to names
+# Enhance results with pathway names
+if (nrow(shared_df) > 0) {
+  # Create full pathway name mapping
+  all_paths <- unique(c(shared_df$from, shared_df$to))
+  path_name_map <- findpathsnames(all_paths, kegg_data)
+  names(path_name_map)[2] <- "PathwayName"
+  
+  # Merge pathway names
+  shared_df <- merge(shared_df, path_name_map, by.x = "from", by.y = "pathwayID")
+  names(shared_df)[ncol(shared_df)] <- "from_name"
+  
+  shared_df <- merge(shared_df, path_name_map, by.x = "to", by.y = "pathwayID")
+  names(shared_df)[ncol(shared_df)] <- "to_name"
+  
+  # Reorder columns
+  shared_df <- shared_df[, c("from", "from_name", "to", "to_name",
+                          "shared_count", "keggID")]
+  
+  # View enhanced results
+  head(shared_df)
+}
+```
+
+## Step 7: Complete Analysis Workflow
+
+Combine all steps into a comprehensive analysis:
+
+```{r workflow, eval = FALSE}
+# 1. Get KEGG data
+kegg_data <- getkeggdata("hsa", cache_dir = "kegg_cache")
+
+# 2. Run enrichment analysis
+enrich_results <- enrichkegg(sig_metabolites, kegg_data)
+
+# 3. Visualize results
+plotenrichbar(enrich_results, top = 15)
+plotenrichdot(enrich_results, top = 15)
+
+# 4. Get pathway names
+top_paths <- head(enrich_results$pathwayID, 10)
+path_names <- findpathsnames(top_paths, kegg_data)
+
+# 5. Analyze shared metabolites
+shared_df <- findsharedcpds(top_paths, kegg_data, min_shared = 3)
+
+# 6. Map metabolite names
 if (nrow(shared_df) > 0) {
   shared_metabs <- unique(unlist(strsplit(shared_df$keggID, ";")))
-  findcpdsnames(shared_metabs, kegg_data)
+  metab_names <- findcpdsnames(shared_metabs, kegg_data)
 }
 ```
 
 ## Conclusion
 
-This tutorial covered the core functionality of `enrichmeta`. For advanced usage, see the function documentation:
+This tutorial covered the full functionality of `enrichmeta`. Key features demonstrated:
+
+1. **Data Acquisition**: `getkeggdata()` for pathway data retrieval and caching
+2. **Enrichment Analysis**: `enrichkegg()` for metabolite set enrichment
+3. **Visualization**: `plotenrichbar()` and `plotenrichdot()` for result exploration
+4. **Mapping Tools**:
+   - `findcpdspaths()`: Find pathways containing metabolites
+   - `findpathscpds()`: Find metabolites in pathways
+   - `findpathsnames()`: Map pathway IDs to descriptive names
+   - `findcpdsnames()`: Map metabolite IDs to compound names
+5. **Pathway Relationships**: `findsharedcpds()` for analyzing shared metabolites
+
+For advanced usage and detailed function parameters:
 ```{r help, eval=FALSE}
 help(package = "enrichmeta")
 ```
+
+## References
+
+1. Kanehisa, M., & Goto, S. (2000). KEGG: Kyoto Encyclopedia of Genes and Genomes. Nucleic Acids Research, 28(1), 27-30.
