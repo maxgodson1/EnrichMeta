@@ -56,10 +56,11 @@ help(package = "enrichmeta")
 ## Citation
 
 To cite `enrichmeta` in publications, please use:
-> Zhang, B. (2024). enrichmeta: Metabolite Enrichment Analysis Using KEGG Pathways. R package version 1.1.1.
+> Zhang, B. (2025). enrichmeta: Metabolite Enrichment Analysis Using KEGG Pathways. R package version 1.1.1.
 
 ## Issues and Contributions
 
 Please report any issues at: [https://github.com/maxgodson1/enrichmeta/issues](https://github.com/maxgodson1/enrichmeta/issues)
 
 Contributions via pull requests are welcome!
+
